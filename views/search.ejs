@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%- q %> | Pico - Torrent</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header class="site-header">
+        <nav class="nav-wrapper">
+          <a href="/" class="logo">Pico Torrent</a>
+          <form id="searchForm" method="GET" action="/search" class="search-form header-search">
+            <div class="search-container">
+              <div class="search-input-wrapper">
+                <svg class="search-icon" viewBox="0 0 24 24">
+                  <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                </svg>
+                <input 
+                  type="text" 
+                  id="search"
+                  name="q" 
+                  value="<%= q %>"
+                  placeholder="Search torrents..." 
+                  required 
+                />
+              </div>
+              <select name="cat" class="category-select">
+                <option value="">All Categories</option>
+                <option value="100" <%= cat === '100' ? 'selected' : '' %>>Audio</option>
+                <option value="200" <%= cat === '200' ? 'selected' : '' %>>Video</option>
+                <option value="300" <%= cat === '300' ? 'selected' : '' %>>Applications</option>
+                <option value="400" <%= cat === '400' ? 'selected' : '' %>>Games</option>
+                <option value="600" <%= cat === '600' ? 'selected' : '' %>>Other</option>
+              </select>
+              <button type="submit" class="search-button">Search</button>
+            </div>
+          </form>
+        </nav>
+      </header>
+
+      <main class="search-results card">
+        <div class="results-header">
+          <div class="results-info">
+            <h2><%- message %></h2>
+            <p><%- count %> results found</p>
+          </div>
+          <div class="sort-controls">
+            <select id="sortSelect" 
+            class="sort-select"
+       >
+              <option value="name">Sort by Name</option>
+              <option value="seeders">Sort by Seeders</option>
+              <option value="leechers">Sort by Leechers</option>
+              <option value="size">Sort by Size</option>
+              <option value="added">Sort by Date Added</option>
+            </select>
+            <button id="sortOrder" class="sort-order" title="Toggle sort order">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path d="M7 10l5 5 5-5z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="results-table-wrapper">
+          <table class="blueTable">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Name</th>
+                <th>Added</th>
+                <th>Size</th>
+                <th>SE</th>
+                <th>LE</th>
+                <th>M</th>
+                <th>U</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <% if (data.length === 0) { %>
+                <tr>
+                  <td colspan="8" class="no-results">
+                    <div class="no-results-content">
+                      <svg viewBox="0 0 24 24" width="48" height="48">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                      </svg>
+                      <p>No results found</p>
+                      <p class="hint">Try different keywords or categories</p>
+                    </div>
+                  </td>
+                </tr>
+              <% } else { %>
+                <% data.forEach(item => { %>
+                  <%- print_item(item) %>
+                <% }) %>
+              <% } %>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="8">
+                  <div class="pagination">
+                    <% if (page > 1) { %>
+                      <a href="<%= make_search_url(q,page-1,cat) %>" class="page-link" title="Previous page">&laquo;</a>
+                      <a href="<%= make_search_url(q,page-1,cat) %>" class="page-link"><%= page - 1 %></a>
+                    <% } %>
+                    <a class="page-link active" href="#"><%= page %></a>
+                    <% if (data.length >= 100) { %>
+                      <a href="<%= make_search_url(q,page+1,cat) %>" class="page-link"><%= page + 1 %></a>
+                      <a href="<%= make_search_url(q,page+1,cat) %>" class="page-link" title="Next page">&raquo;</a>
+                    <% } %>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </main>
+
+      <input type="hidden" id="page" value="<%= page %>" />
+      <input type="hidden" id="hasMore" value="<%= data.length >= 100 %>" />
+
+      <footer class="site-footer">
+        <p>Press <kbd>/</kbd> to search</p>
+      </footer>
+    </div>
+
+    <%- include('components/loading') %>
+
+    <script>
+      const searchForm = document.getElementById('searchForm');
+      const searchInput = document.getElementById('search');
+      const sortSelect = document.getElementById('sortSelect');
+      const sortOrder = document.getElementById('sortOrder');
+      const tableBody = document.getElementById('table-body');
+      let isAscending = false;
+      const loadingOverlay = document.querySelector('.loading-overlay');
+
+     // Function to get column value based on type
+function getCellValue(row, type) {
+  let cellText;
+  switch(type) {
+      case 'name':
+          return row.cells[1].textContent.trim().toLowerCase();
+      case 'seeders':
+          return parseInt(row.cells[4].textContent) || 0;
+      case 'leechers':
+          return parseInt(row.cells[5].textContent) || 0;
+      case 'size':
+          return parseFileSize(row.cells[3].textContent);
+      case 'added':
+          return new Date(row.cells[2].textContent).getTime() || 0;
+      default:
+          return row.cells[1].textContent.trim();
+  }
+}
+
+
+   // Convert file size (e.g., "1.2 GB") to bytes for sorting
+function parseFileSize(sizeText) {
+  const units = { 'B': 1, 'KB': 1024, 'MB': 1024**2, 'GB': 1024**3, 'TB': 1024**4 };
+  const match = sizeText.match(/([\d.]+)\s*(B|KB|MB|GB|TB)/);
+  if (!match) return 0;
+  return parseFloat(match[1]) * (units[match[2]] || 1);
+}
+      // Main sorting function
+function sortTable() {
+  const sortBy = sortSelect.value;
+  const rows = Array.from(tableBody.getElementsByTagName('tr'));
+  
+  // Determine sort direction
+  const direction = isAscending ? 1 : -1;
+
+  rows.sort((a, b) => {
+      const aValue = getCellValue(a, sortBy);
+      const bValue = getCellValue(b, sortBy);
+      
+      return (aValue > bValue ? 1 : -1) * direction;
+  });
+
+  // Clear the table and re-insert sorted rows
+  tableBody.innerHTML = "";
+  rows.forEach(row => tableBody.appendChild(row));
+}
+
+
+
+      // Sort event listeners
+      sortSelect.addEventListener('change', sortTable);
+
+      sortOrder.addEventListener('click', () => {
+        isAscending = !isAscending;
+        sortOrder.style.transform = isAscending ? 'rotate(180deg)' : '';
+        sortTable();
+      });
+
+      // Initialize sort
+      sortTable();
+
+      // Search form handling
+      searchForm.addEventListener('submit', (e) => {
+        loadingOverlay.classList.add('active');
+      });
+
+      // Update the debounced search
+      let timeout;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          if (e.target.value.length >= 3) {
+            loadingOverlay.classList.add('active');
+            searchForm.submit();
+          }
+        }, 500);
+      });
+
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== searchInput) {
+          e.preventDefault();
+          searchInput.focus();
+        }
+      });
+
+      function make_search_url(q, page = 1, cat = "") {
+        return "/search?q=" + encodeURIComponent(q) + "&page=" + page + "&cat=" + cat;
+      }
+
+      // Cache management
+      const searchCache = new Map();
+      const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+      // Infinite scroll
+      let isLoading = false;
+      let currentPage = document.getElementById('page').value;
+      let hasMore = document.getElementById('hasMore').value === 'true';
+      
+      // Debounced search with cache
+      async function performSearch(query, category, page = 1, useCache = true) {
+        const cacheKey = `${query}-${category}-${page}`;
+        
+        if (useCache && searchCache.has(cacheKey)) {
+          const cached = searchCache.get(cacheKey);
+          if (Date.now() - cached.timestamp < CACHE_DURATION) {
+            return cached.data;
+          }
+          searchCache.delete(cacheKey);
+        }
+
+        const url = make_search_url(query, page, category);
+        const response = await fetch(url, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) throw new Error('Search failed');
+        
+        const data = await response.json();
+        console.log('Fetched:', data);
+        searchCache.set(cacheKey, {
+          data,
+          timestamp: Date.now()
+        });
+        
+        return data;
+      }
+
+      // Infinite scroll handler
+      const observerOptions = {
+        root: null,
+        rootMargin: '100px',
+        threshold: 0.1
+      };
+
+      const loadMoreObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && hasMore && !isLoading) {
+            loadMoreResults();
+          }
+        });
+      }, observerOptions);
+
+      // Add loading indicator at the bottom
+      const loadingIndicator = document.createElement('div');
+      loadingIndicator.className = 'scroll-loading';
+      loadingIndicator.innerHTML = `
+        <div class="loading-dots">
+          <div></div><div></div><div></div>
+        </div>
+      `;
+      document.querySelector('.blueTable').after(loadingIndicator);
+      loadMoreObserver.observe(loadingIndicator);
+
+      async function loadMoreResults() {
+        if (isLoading || !hasMore) return;
+        
+        isLoading = true;
+        loadingIndicator.classList.add('active');
+        
+        try {
+          const nextPage = parseInt(currentPage) + 1;
+          const results = await performSearch(
+            searchInput.value,
+            document.querySelector('.category-select').value,
+            nextPage
+          );
+          
+          if (results.data && results.data.length > 0) {
+            const tbody = document.getElementById('table-body');
+            tbody.insertAdjacentHTML('beforeend', results.html);
+            currentPage = nextPage;
+            hasMore = results.hasMore;
+            
+            // Update hidden inputs
+            document.getElementById('page').value = nextPage;
+            document.getElementById('hasMore').value = results.hasMore;
+            
+            // Re-sort the table if needed
+            if (sortSelect.value !== 'seeders') {
+              sortTable();
+            }
+          } else {
+            hasMore = false;
+          }
+        } catch (error) {
+          console.error('Failed to load more results:', error);
+        } finally {
+          isLoading = false;
+          loadingIndicator.classList.remove('active');
+        }
+      }
+
+      // Enhanced search input with suggestions
+      let suggestionsTimeout;
+      const suggestionsContainer = document.createElement('div');
+      suggestionsContainer.className = 'search-suggestions';
+      searchInput.parentNode.appendChild(suggestionsContainer);
+
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(suggestionsTimeout);
+        clearTimeout(timeout);
+
+        const query = e.target.value.trim();
+        if (query.length < 3) {
+          suggestionsContainer.style.display = 'none';
+          return;
+        }
+
+        suggestionsTimeout = setTimeout(async () => {
+          try {
+            loadingOverlay.classList.add('active');
+            const results = await performSearch(query, '', 1, true);
+            loadingOverlay.classList.remove('active');
+
+            if (results.data && results.data.length > 0) {
+              const suggestions = results.data
+                .slice(0, 5)
+                .map(item => `
+                  <div class="suggestion-item" data-id="${item.id}">
+                    <div class="suggestion-name">${item.name}</div>
+                    <div class="suggestion-meta">
+                      <span class="seeds">
+                        <svg viewBox="0 0 24 24" width="12" height="12">
+                          <path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        ${item.seeders}
+                      </span>
+                      <span class="size">${print_size(item.size)}</span>
+                    </div>
+                  </div>
+                `)
+                .join('');
+              
+              suggestionsContainer.innerHTML = suggestions;
+              suggestionsContainer.style.display = 'block';
+            } else {
+              suggestionsContainer.style.display = 'none';
+            }
+          } catch (error) {
+            console.error('Failed to fetch suggestions:', error);
+            loadingOverlay.classList.remove('active');
+          }
+        }, 300);
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('.search-input-wrapper')) {
+          suggestionsContainer.style.display = 'none';
+        }
+      });
+
+      // Handle suggestion clicks
+      suggestionsContainer.addEventListener('click', (e) => {
+        const suggestionItem = e.target.closest('.suggestion-item');
+        if (suggestionItem) {
+          const id = suggestionItem.dataset.id;
+          window.location.href = `/details/${id}`;
+        }
+      });
+    </script>
+  </body>
+</html>

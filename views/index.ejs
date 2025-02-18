@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pico - Torrent Search</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="container start-page">
+      <div class="hero">
+        <h1>Pico Torrent</h1>
+        <p class="subtitle">Fast and simple torrent search</p>
+      </div>
+
+      <div class="search-card card">
+        <form id="searchForm" method="GET" action="/search" class="search-form">
+          <div class="search-container">
+            <div class="search-input-wrapper">
+              <svg class="search-icon" viewBox="0 0 24 24">
+                <path
+                  d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
+                />
+              </svg>
+              <input
+                type="text"
+                name="q"
+                placeholder="Search torrents..."
+                required
+                autocomplete="off"
+                autofocus
+              />
+            </div>
+            <select name="cat" class="category-select">
+              <option value="">All Categories</option>
+              <option value="100">Audio</option>
+              <option value="200">Video</option>
+              <option value="300">Applications</option>
+              <option value="400">Games</option>
+              <option value="600">Other</option>
+            </select>
+            <button type="submit" class="search-button">Search</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="features">
+        <div class="feature-card card">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"
+            />
+          </svg>
+          <h3>Fast Search</h3>
+          <p>Instantly search through millions of torrents</p>
+        </div>
+        <div class="feature-card card">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"
+            />
+          </svg>
+          <h3>Secure</h3>
+          <p>Safe and private torrent searching</p>
+        </div>
+        <div class="feature-card card">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"
+            />
+          </svg>
+          <h3>Organized</h3>
+          <p>Well-organized categories and search results</p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

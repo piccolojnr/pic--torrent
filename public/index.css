@@ -1,0 +1,86 @@
+.container {
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.search {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.search input {
+  width: 70%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.search button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background: #333;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.blueTable {
+  width: 100%;
+  text-align: left;
+  border-collapse: collapse;
+}
+
+.blueTable td,
+.blueTable th {
+  border: 1px solid #aaa;
+  padding: 10px;
+}
+
+.blueTable tbody td {
+  font-size: 13px;
+}
+
+.blueTable thead th {
+  background: #f3f3f3;
+  color: #333;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.blueTable thead th:first-child {
+  border-left: none;
+}
+
+.blueTable thead th:last-child {
+  border-right: none;
+}
+
+.blueTable tbody tr:nth-child(odd) {
+  background: #f1f1f1;
+}
+
+.blueTable tbody tr:hover {
+  background: #e0f0ff;
+}
+
+.blueTable tfoot td {
+  font-size: 14px;
+}
+
+.blueTable tfoot .links {
+  text-align: right;
+}
+
+.blueTable tfoot .links a {
+  display: inline-block;
+  padding: 2px 8px;
+  margin: 0 2px;
+  color: #fff;
+  background: #333;
+  border-radius: 5px;
+}
+
+.blueTable tfoot .links a.active {
+  background: #000;
+}
